@@ -13,13 +13,20 @@ def accept_wrapper(sock):
     зарегистрировать его с помощью селектора."""
     # Поскольку слушающий сокет был зарегистрирован для
     # селекторов событий EVENT_READ, он должен быть готов к чтению.
-    # Мы вызываем sock.accept (), а затем сразу вызываем conn.setblocking (False),
-    # чтобы перевести сокет в неблокирующий режим.
+    # Мы вызываем sock.accept ()
     conn, addr = sock.accept()  # Должен быть готов к чтению
+    
     print("Принятое соединение от", addr)
-    conn.setblocking(False)
+
+    conn.setblocking(False)  # чтобы перевести сокет в неблокирующий режим.
+
+    # объект для хранения данных, которые мы хотим включить вместе с сокетом
     data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"")
+    
+    # Поскольку мы хотим знать, когда клиентское соединение готово к чтению и записи, оба этих события устанавливаются с помощью следующего:
     events = selectors.EVENT_READ | selectors.EVENT_WRITE
+
+    # Маска событий, сокет и объекты данных передаются в sel.register().
     sel.register(conn, events, data=data)
 
 
