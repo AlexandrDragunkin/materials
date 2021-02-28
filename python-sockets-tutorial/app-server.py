@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# -*- coding: utf-8 -*-
 import sys
 import socket
 import selectors
@@ -11,8 +11,8 @@ sel = selectors.DefaultSelector()
 
 
 def accept_wrapper(sock):
-    conn, addr = sock.accept()  # Should be ready to read
-    print("accepted connection from", addr)
+    conn, addr = sock.accept()  # Должен быть готов к чтению
+    print("Принятое соединение от", addr)
     conn.setblocking(False)
     message = libserver.Message(sel, conn, addr)
     sel.register(conn, selectors.EVENT_READ, data=message)
@@ -24,7 +24,7 @@ if len(sys.argv) != 3:
 
 host, port = sys.argv[1], int(sys.argv[2])
 lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# Avoid bind() exception: OSError: [Errno 48] Address already in use
+# Избегайте исключения bind (): OSError: [Errno 48] Адрес уже используется
 lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 lsock.bind((host, port))
 lsock.listen()
@@ -37,8 +37,14 @@ try:
         events = sel.select(timeout=None)
         for key, mask in events:
             if key.data is None:
+                # Если key.data имеет значение None, значит он получен
+                # из прослушивающего сокета, и нам нужно принять accept() соединение                
                 accept_wrapper(key.fileobj)
             else:
+                # Если key.data не равно None, значит, это клиентский сокет,
+                # который уже был принят, и нам необходимо его обслуживать.
+                # Вызывается service_connection () и передается ключ и маска,
+                # которые содержат всё, что нам нужно для работы с сокетом.                
                 message = key.data
                 try:
                     message.process_events(mask)
