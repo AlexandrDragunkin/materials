@@ -31,6 +31,13 @@ def accept_wrapper(sock):
 
 
 def service_connection(key, mask):
+    """Обрабатывается клиентское соединение, когда оно готово.
+    
+    Сердце простого сервера с несколькими подключениями.
+    key - это именованный кортеж, возвращаемый функцией select (), который 
+          содержит объект сокета (fileobj) и объект данных.
+    mask - содержит уже готовые события.
+    """
     sock = key.fileobj
     data = key.data
     if mask & selectors.EVENT_READ:
